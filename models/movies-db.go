@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -82,11 +83,16 @@ func (m *DBModel) Get(id int) (*Movie, error) {
 }
 
 // Get returns all movies and error, if any
-func (m *DBModel) All() ([]*Movie, error) {
+func (m *DBModel) All(genre ...int) ([]*Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `select 
+	where := ""
+	if len(genre) > 0 {
+		where = fmt.Sprintf("where id in (select movie_id from movies_genres where genre_id = %d)", genre[0])
+	}
+
+	query := fmt.Sprintf(`select 
 	id,
 	title,
 	description,
@@ -97,7 +103,7 @@ func (m *DBModel) All() ([]*Movie, error) {
     mpaa_rating,
     created_at,
     updated_at
-	from movies order by title`
+	from movies %s order by title`, where)
 
 	rows, err := m.DB.QueryContext(ctx, query)
 
@@ -202,4 +208,31 @@ func (m *DBModel) GenresAll() ([]*Genre, error) {
 	}
 
 	return genres, nil
+}
+
+func (m *DBModel) InsertMovie(movie Movie) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `insert into movies (title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at)
+	 values
+	  ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
+	_, err := m.DB.ExecContext(ctx, stmt,
+		movie.Title,
+		movie.Description,
+		movie.Year,
+		movie.ReleaseDate,
+		movie.Runtime,
+		movie.Rating,
+		movie.MPAARating,
+		movie.CreatedAt,
+		movie.UpdatedAt)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
 }
