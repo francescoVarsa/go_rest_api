@@ -12,8 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// This is a mockup those data wouldn't be used in future, commit and push passwords is not a good idea
-// in the future i will take care of that but now it's not the focus.
 var validUser = models.User{
 	ID:       10,
 	Email:    "me@here.com",
