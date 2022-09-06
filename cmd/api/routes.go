@@ -32,5 +32,8 @@ func (app *application) routes() http.Handler {
 	router.POST("/v1/admin/editMovie", app.wrap(secure.ThenFunc(app.editMovie)))
 	router.GET("/v1/deleteMovie/:id", app.wrap(secure.ThenFunc(app.deleteMovie)))
 
+	// GraphQL requests
+	router.HandlerFunc(http.MethodPost, "/v1/graphql/list", app.moviesGraphQL)
+
 	return app.enableCORS(router)
 }
