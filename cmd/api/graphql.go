@@ -87,9 +87,14 @@ var movieType = graphql.NewObject(
 func (app *application) moviesGraphQL(w http.ResponseWriter, r *http.Request) {
 	movies, _ = app.models.DB.All()
 
-	q, _ := io.ReadAll(r.Body)
-	query := string(q)
+	type Query struct {
+		Query string
+	}
 
+	q, _ := io.ReadAll(r.Body)
+	var query Query
+
+	json.Unmarshal(q, &query)
 	log.Println(query)
 
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: fields}
@@ -102,7 +107,7 @@ func (app *application) moviesGraphQL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := graphql.Params{Schema: schema, RequestString: query}
+	params := graphql.Params{Schema: schema, RequestString: query.Query}
 	resp := graphql.Do(params)
 
 	if len(resp.Errors) > 0 {
