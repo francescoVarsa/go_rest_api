@@ -27,10 +27,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/movies", app.getAllMovies)
 	router.HandlerFunc(http.MethodGet, "/v1/genres", app.getAllGenres)
 	router.HandlerFunc(http.MethodGet, "/v1/movies/:genre_id", app.getAllMoviesByGenre)
-	router.HandlerFunc(http.MethodDelete, "/v1/deleteMovie/:id", app.deleteMovie)
 
 	// Secured routes
 	router.POST("/v1/admin/editMovie", app.wrap(secure.ThenFunc(app.editMovie)))
+	router.GET("/v1/deleteMovie/:id", app.wrap(secure.ThenFunc(app.deleteMovie)))
 
 	return app.enableCORS(router)
 }
