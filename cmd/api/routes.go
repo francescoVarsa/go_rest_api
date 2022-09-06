@@ -8,9 +8,13 @@ import (
 	"github.com/justinas/alice"
 )
 
+type p string
+
+var par p = "params"
+
 func (app *application) wrap(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		ctx := context.WithValue(r.Context(), "params", ps)
+		ctx := context.WithValue(r.Context(), par, ps)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
@@ -30,7 +34,7 @@ func (app *application) routes() http.Handler {
 
 	// Secured routes
 	router.POST("/v1/admin/editMovie", app.wrap(secure.ThenFunc(app.editMovie)))
-	router.GET("/v1/deleteMovie/:id", app.wrap(secure.ThenFunc(app.deleteMovie)))
+	router.DELETE("/v1/deleteMovie/:id", app.wrap(secure.ThenFunc(app.deleteMovie)))
 
 	// GraphQL requests
 	router.HandlerFunc(http.MethodPost, "/v1/graphql", app.moviesGraphQL)
